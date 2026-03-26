@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disk Scheduling Algorithms Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .algorithm-card { transition: all 0.3s ease; }
+        .algorithm-card:hover { transform: translateY(-5px); }
+        .chart-container { height: 250px; width: 100%; position: relative; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <!-- Navigation/Header -->
+    <nav class="bg-white shadow-sm border-b sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-2">
+                    <div class="bg-blue-600 p-2 rounded-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg>
+                    </div>
+                    <span class="text-xl font-bold tracking-tight">DiskSched<span class="text-blue-600">Pro</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#learn" class="hover:text-blue-600 font-medium">Learn</a>
+                    <a href="#simulator" class="hover:text-blue-600 font-medium">Simulator</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Hero Section -->
+        <section id="learn" class="mb-12">
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Disk Scheduling Algorithms</h1>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Visualize and calculate the <strong>Total Head Movement</strong> required to satisfy disk I/O requests.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="algorithm-card bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-blue-600">FCFS</h3>
+                    <p class="text-xs text-gray-500 mb-2 uppercase tracking-tighter">First Come First Serve</p>
+                    <p class="text-gray-600 text-xs">Services requests in strict order of arrival. Simple but high head movement.</p>
+                </div>
+                <div class="algorithm-card bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-green-600">SSTF</h3>
+                    <p class="text-xs text-gray-500 mb-2 uppercase tracking-tighter">Shortest Seek Time First</p>
+                    <p class="text-gray-600 text-xs">Greedy approach. Picks the closest request to the current head position.</p>
+                </div>
+                <div class="algorithm-card bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-orange-600">SCAN</h3>
+                    <p class="text-xs text-gray-500 mb-2 uppercase tracking-tighter">Elevator Algorithm</p>
+                    <p class="text-gray-600 text-xs">Moves head from one end to the other, servicing all requests in between.</p>
+                </div>
+                <div class="algorithm-card bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-red-600">C-SCAN</h3>
+                    <p class="text-xs text-gray-500 mb-2 uppercase tracking-tighter">Circular SCAN</p>
+                    <p class="text-gray-600 text-xs">Provides uniform waiting time by only servicing requests in one direction.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simulator Configuration -->
+        <section id="simulator" class="bg-white rounded-2xl shadow-lg border border-gray-200 mb-8">
+            <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-end gap-4">
+                <div class="flex-grow">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Request Queue (e.g., 98, 183, 37)</label>
+                    <input id="queue-input" type="text" value="98, 183, 37, 122, 14, 124, 65, 67" 
+                           class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div class="w-24">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Start Head</label>
+                    <input id="head-input" type="number" value="53" class="w-full px-3 py-2 rounded-lg border border-gray-300">
+                </div>
+                <div class="w-24">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Max Cyl.</label>
+                    <input id="max-input" type="number" value="200" class="w-full px-3 py-2 rounded-lg border border-gray-300">
+                </div>
+                <div class="w-32">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Direction</label>
+                    <select id="direction-input" class="w-full px-3 py-2 rounded-lg border border-gray-300">
+                        <option value="right">Right (High)</option>
+                        <option value="left">Left (Low)</option>
+                    </select>
+                </div>
+                <button onclick="simulate()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 rounded-lg font-bold transition-all shadow-md active:scale-95">
+                    Run Simulation
+                </button>
+            </div>
+        </section>
+
+        <!-- Results Grid -->
+        <div id="visual-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- FCFS Chart -->
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm opacity-50 transition-opacity duration-500" id="card-FCFS">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-blue-600">FCFS</h3>
+                    <div class="text-right">
+                        <p class="text-[10px] text-gray-400 uppercase font-bold">Total Head Movement</p>
+                        <span class="text-sm font-mono font-bold text-blue-800" id="move-FCFS">0</span>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="chart-FCFS"></canvas></div>
+            </div>
+
+            <!-- SSTF Chart -->
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm opacity-50 transition-opacity duration-500" id="card-SSTF">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-green-600">SSTF</h3>
+                    <div class="text-right">
+                        <p class="text-[10px] text-gray-400 uppercase font-bold">Total Head Movement</p>
+                        <span class="text-sm font-mono font-bold text-green-800" id="move-SSTF">0</span>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="chart-SSTF"></canvas></div>
+            </div>
+
+            <!-- SCAN Chart -->
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm opacity-50 transition-opacity duration-500" id="card-SCAN">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-orange-600">SCAN</h3>
+                    <div class="text-right">
+                        <p class="text-[10px] text-gray-400 uppercase font-bold">Total Head Movement</p>
+                        <span class="text-sm font-mono font-bold text-orange-800" id="move-SCAN">0</span>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="chart-SCAN"></canvas></div>
+            </div>
+
+            <!-- C-SCAN Chart -->
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm opacity-50 transition-opacity duration-500" id="card-CSCAN">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-red-600">C-SCAN</h3>
+                    <div class="text-right">
+                        <p class="text-[10px] text-gray-400 uppercase font-bold">Total Head Movement</p>
+                        <span class="text-sm font-mono font-bold text-red-800" id="move-CSCAN">0</span>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="chart-CSCAN"></canvas></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let charts = {};
+
+        function simulate() {
+            const rawQueue = document.getElementById('queue-input').value;
+            const head = parseInt(document.getElementById('head-input').value);
+            const max = parseInt(document.getElementById('max-input').value);
+            const dir = document.getElementById('direction-input').value;
+
+            if (!rawQueue) return;
+            const queue = rawQueue.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+
+            const results = [
+                runFCFS([...queue], head),
+                runSSTF([...queue], head),
+                runSCAN([...queue], head, max, dir),
+                runCSCAN([...queue], head, max, dir)
+            ];
+
+            results.forEach(res => {
+                const id = res.name.replace('-', '');
+                document.getElementById(`card-${id}`).classList.remove('opacity-50');
+                document.getElementById(`move-${id}`).innerText = `${res.movement} Cylinders`;
+                renderIndividualChart(id, res.sequence, res.color, max);
+            });
+        }
+
+        function renderIndividualChart(id, sequence, color, max) {
+            const ctx = document.getElementById(`chart-${id}`).getContext('2d');
+            
+            if (charts[id]) charts[id].destroy();
+
+            charts[id] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sequence.map((_, i) => i),
+                    datasets: [{
+                        label: 'Head Position',
+                        data: sequence,
+                        borderColor: color,
+                        backgroundColor: color + '22',
+                        fill: false,
+                        tension: 0,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            min: 0,
+                            max: max,
+                            title: { display: true, text: 'Cylinder' }
+                        },
+                        y: {
+                            reverse: true,
+                            title: { display: true, text: 'Order of Service' },
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `Cylinder: ${context.parsed.x}`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function runFCFS(q, head) {
+            let sequence = [head, ...q];
+            let move = 0;
+            for(let i=0; i<sequence.length-1; i++) move += Math.abs(sequence[i] - sequence[i+1]);
+            return { name: "FCFS", sequence, movement: move, color: '#3b82f6' };
+        }
+
+        function runSSTF(q, head) {
+            let sequence = [head];
+            let current = head;
+            let tempQ = [...q];
+            while(tempQ.length > 0) {
+                let closest = tempQ.reduce((prev, curr) => Math.abs(curr - current) < Math.abs(prev - current) ? curr : prev);
+                sequence.push(closest);
+                tempQ = tempQ.filter(item => item !== closest);
+                current = closest;
+            }
+            let move = 0;
+            for(let i=0; i<sequence.length-1; i++) move += Math.abs(sequence[i] - sequence[i+1]);
+            return { name: "SSTF", sequence, movement: move, color: '#10b981' };
+        }
+
+        function runSCAN(q, head, max, dir) {
+            let left = q.filter(n => n < head).sort((a,b) => b-a);
+            let right = q.filter(n => n > head).sort((a,b) => a-b);
+            let sequence = [head];
+            if(dir === 'right') sequence = [head, ...right, max - 1, ...left];
+            else sequence = [head, ...left, 0, ...right];
+            let move = 0;
+            for(let i=0; i<sequence.length-1; i++) move += Math.abs(sequence[i] - sequence[i+1]);
+            return { name: "SCAN", sequence, movement: move, color: '#f59e0b' };
+        }
+
+        function runCSCAN(q, head, max, dir) {
+            let left = q.filter(n => n < head).sort((a,b) => a-b);
+            let right = q.filter(n => n > head).sort((a,b) => a-b);
+            let sequence = [head];
+            if(dir === 'right') sequence = [head, ...right, max - 1, 0, ...left];
+            else sequence = [head, ...left, 0, max - 1, ...right];
+            let move = 0;
+            for(let i=0; i<sequence.length-1; i++) move += Math.abs(sequence[i] - sequence[i+1]);
+            return { name: "C-SCAN", sequence, movement: move, color: '#ef4444' };
+        }
+    </script>
+</body>
+</html>
